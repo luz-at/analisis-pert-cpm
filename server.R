@@ -1,13 +1,6 @@
 # =============================================================
 #  server.R
-#  Conecta el motor de cálculo (pert_logic.R) con la interfaz (ui.R)
 # =============================================================
-
-# library(shiny)
-# library(readxl)
-# library(reactable)
-# library(echarts4r)
-# library(dplyr)
 
 server <- function(input, output, session) {
   
@@ -19,9 +12,10 @@ server <- function(input, output, session) {
   })
   
   observeEvent(modelo(), {
-    updateNumericInput(session, "ts_opt", value = round(modelo()$a_rc, 2))
-    updateNumericInput(session, "ts_pes", value = round(modelo()$b_rc, 2))
-    updateNumericInput(session, "ts_libre", value = round(modelo()$TPy, 2))
+    M <- modelo()
+    updateNumericInput(session, "ts_opt", value = round(M$TPy - M$var_rc, 2))
+    updateNumericInput(session, "ts_pes", value = round(M$TPy + M$var_rc, 2))
+    updateNumericInput(session, "ts_libre", value = round(M$TPy, 2))
   })
   
   # =================== VALUE BOXES ===================
@@ -38,6 +32,7 @@ server <- function(input, output, session) {
     m <- modelo()$tabla
     reactable(
       m[, c("Codigo","Actividad","Precedentes","a","m","b","t","Varianza")],
+      rownames = FALSE,
       columns = list(
         Codigo = colDef(name = "Cód.", width = 70, align = "center",
                         style = list(fontWeight = 700)),
@@ -66,6 +61,7 @@ server <- function(input, output, session) {
     m <- modelo()$tabla
     reactable(
       m[, c("Codigo","Actividad","ES","EF","LS","LF","Holgura","Critica")],
+      rownames = FALSE,
       columns = list(
         Codigo = colDef(name = "Cód.", width = 70, align = "center", style = list(fontWeight = 700)),
         Actividad = colDef(name = "Actividad", minWidth = 200),
@@ -102,7 +98,7 @@ server <- function(input, output, session) {
   output$gantt <- renderEcharts4r({
     m <- modelo()$tabla
     m <- m[order(-m$ES), ]
-    m$cat <- paste0(m$Codigo, " · ", substr(m$Actividad, 1, 28))
+    m$cat <- m$Codigo
     m$cat <- factor(m$cat, levels = unique(m$cat))
     
     dfg <- data.frame(
@@ -258,12 +254,10 @@ server <- function(input, output, session) {
     ts3 <- TPy + z3 * s
     zL <- (input$ts_libre - TPy) / s
     
-    mk_card <- function(titulo, formula_txt, z_txt, p_val, nota, color = "#00BFA5") {
+    mk_card <- function(titulo, p_val, nota, color = "#00BFA5") {
       div(
         class = "prob-card",
         tags$h6(titulo),
-        div(class = "prob-z", formula_txt),
-        div(class = "prob-z", z_txt),
         div(class = "prob-p", style = sprintf("color:%s", color), p_val),
         div(style = "font-size:.78rem;color:#6B7C93;", nota)
       )
@@ -272,33 +266,33 @@ server <- function(input, output, session) {
     layout_columns(
       col_widths = breakpoints(sm = c(12), md = c(6,6), lg = c(3,3,3,3)),
       mk_card(
-        "P1 · Antes del tiempo optimista",
-        sprintf("z = (%.2f − %.2f) / %.3f", input$ts_opt, TPy, s),
-        sprintf("z = %.4f", z1),
+        "Probabilidad de terminar antes de TS",
+        # sprintf("z = (%.2f − %.2f) / %.3f", input$ts_opt, TPy, s),
+        # sprintf("z = %.4f", z1),
         sprintf("%.2f%%", 100 * pnorm(z1)),
         sprintf("P(T ≤ %.2f)", input$ts_opt),
         "#00BFA5"
       ),
       mk_card(
-        "P2 · Después del tiempo pesimista",
-        sprintf("z = (%.2f − %.2f) / %.3f", input$ts_pes, TPy, s),
-        sprintf("z = %.4f", z2),
+        "Probabilidad de terminar después de TS",
+        # sprintf("z = (%.2f − %.2f) / %.3f", input$ts_pes, TPy, s),
+        # sprintf("z = %.4f", z2),
         sprintf("%.2f%%", 100 * (1 - pnorm(z2))),
         sprintf("P(T > %.2f)", input$ts_pes),
         "#E74C3C"
       ),
       mk_card(
-        sprintf("P3 · Duración al %.0f%%", 100 * input$prob3),
-        sprintf("TS = %.2f + %.4f × %.3f", TPy, z3, s),
-        sprintf("z(%.0f%%) = %.4f", 100*input$prob3, z3),
+        sprintf("Duración al %.0f%%", 100 * input$prob3),
+        # sprintf("TS = %.2f + %.4f × %.3f", TPy, z3, s),
+        # sprintf("z(%.0f%%) = %.4f", 100*input$prob3, z3),
         sprintf("%.2f", ts3),
         "Unidades de tiempo estimadas",
         "#FDD365"
       ),
       mk_card(
         "Consulta libre",
-        sprintf("z = (%.2f − %.2f) / %.3f", input$ts_libre, TPy, s),
-        sprintf("z = %.4f", zL),
+        # sprintf("z = (%.2f − %.2f) / %.3f", input$ts_libre, TPy, s),
+        # sprintf("z = %.4f", zL),
         sprintf("%.2f%%", 100 * pnorm(zL)),
         sprintf("P(T ≤ %.2f)", input$ts_libre),
         "#1F6FBF"

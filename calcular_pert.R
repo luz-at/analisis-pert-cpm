@@ -2,13 +2,12 @@
 #  pert_logic.R
 #  MOTOR DE CÁLCULO PERT-CPM (independiente de la interfaz)
 #
-#  Este archivo NO sabe nada de Shiny ni de gráficos.
 #  Solo recibe una tabla de actividades y devuelve los resultados
 #  numéricos: t, varianza, ES/EF/LS/LF, holgura y ruta crítica.
 #
 #  Se puede probar solo, desde la consola de R, sin abrir la app:
 #     source("pert_logic.R")
-#     datos <- readxl::read_excel("datos_prueba_sabbag.xlsx")
+#     datos <- readxl::read_excel("datos_prueba.xlsx")
 #     resultado <- calcular_pert(datos)
 #     resultado$TPy
 # =============================================================
@@ -51,7 +50,7 @@ calcular_pert <- function(df) {
   if (length(faltantes))
     stop(paste("Precedentes no definidos como actividad:", paste(unique(faltantes), collapse = ", ")))
   
-  # Nodos ficticios INICIO y FIN (igual que O y Z del ejemplo del profesor)
+  # Nodos ficticios INICIO y FIN
   nodes <- c(INICIO, df$Codigo, FIN)
   preds[[INICIO]] <- character(0)
   sin_pred <- df$Codigo[sapply(df$Codigo, function(n) length(preds[[n]]) == 0)]

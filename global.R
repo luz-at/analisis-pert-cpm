@@ -1,18 +1,10 @@
 # =============================================================
 #  global.R
-#  PUNTO DE ENTRADA
-#
-#  Shiny carga automáticamente, en este orden, los 3 archivos de
-#  esta carpeta: global.R -> ui.R -> server.R
 #
 #  Este archivo solo se encarga de:
-#   1. Instalar/cargar los paquetes necesarios
+#   1. Cargar los paquetes necesarios
 #   2. Cargar la lógica de cálculo (pert_logic.R) para que esté
 #      disponible tanto en ui.R como en server.R
-#
-#  Para correr la app: abrir esta carpeta en RStudio y presionar
-#  "Run App" (o ejecutar shiny::runApp() desde la consola estando
-#  en esta carpeta).
 # =============================================================
 
 
@@ -46,9 +38,9 @@ tema <- bslib::bs_theme(
 )
 
 # Paleta compartida para los gráficos (ECharts)
-PAL_TEAL   <- "#00BFA5"
-PAL_BLUE   <- "#1F6FBF"
-PAL_NAVY   <- "#1E3A5F"
-PAL_RED    <- "#E74C3C"
-PAL_GRAY   <- "#90A4B8"
+PAL_TEAL <- "#00BFA5"
+PAL_BLUE <- "#1F6FBF"
+PAL_NAVY <- "#1E3A5F"
+PAL_RED  <- "#E74C3C"
+PAL_GRAY <- "#90A4B8"
 PAL_YELLOW <- "#FDD365"

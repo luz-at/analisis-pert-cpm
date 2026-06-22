@@ -1,10 +1,5 @@
 # =============================================================
 #  ui.R
-#  INTERFAZ — estructura tipo "Tablero de actividad del agente"
-#  (page_navbar + cards con título/subtítulo + navset_card_pill)
-#
-#  Este archivo no calcula nada, solo define lo visual.
-#  La lógica vive en pert_logic.R y la conexión en server.R.
 # =============================================================
 
 ui <- page_navbar(
@@ -13,19 +8,10 @@ ui <- page_navbar(
   lang = "es",
   theme = tema,
   
-  title = tags$div(
-    class = "d-flex align-items-center gap-2",
-    tags$div(
-      style = "width:34px;height:34px;border-radius:8px;
-               background:linear-gradient(135deg,#00BFA5,#1F6FBF);
-               display:flex;align-items:center;justify-content:center;
-               color:#fff;font-weight:700;font-size:15px;flex-shrink:0;",
-      "P"
-    ),
-    tags$span("Análisis PERT-CPM", style = "font-weight:600;")
-  ),
+  window_title = "Análisis PERT-CPM",
+  title = tags$span("Análisis PERT-CPM", style = "font-weight:600; color:white;"),
   
-  bg = "#1E3A5F",
+  bg = "#1D2C44",
   inverse = TRUE,
   
   header = tagList(
@@ -41,14 +27,17 @@ ui <- page_navbar(
       .net-tooltip-label{color:#90A4B8;}
       .prob-card{background:#F9FAFB;border-radius:12px;padding:1rem 1.2rem;border:1px solid #E5E9EF;height:100%;}
       .prob-card h6{font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;color:#6B7C93;margin-bottom:.5rem;font-weight:600;}
-      .prob-z{font-family:'Space Mono',monospace;font-size:.92rem;color:#1E3A5F;}
+      .prob-z{font-family:'Space Mono',monospace;font-size:.92rem;color:#1D2C44;}
       .prob-p{font-family:'Space Mono',monospace;font-size:1.7rem;font-weight:700;color:#00BFA5;margin:.25rem 0;}
+      .bslib-value-box { min-height: 100px !important; }
+      .bslib-value-box .value-box-showcase { padding: 0.5rem !important; }
+      .bslib-value-box .bi { font-size: 1.5rem !important; }
     "))
   ),
   
   # ================= Pestaña: Análisis PERT-CPM =================
   nav_panel(
-    title = "Análisis",
+    title = "Inicio",
     #icon = bs_icon("diagram-3-fill"),
     
     div(
@@ -61,10 +50,11 @@ ui <- page_navbar(
             col_widths = breakpoints(sm = c(12), md = c(7, 5)),
             
             tags$div(
-              tags$p(class = "titulo", "Estudio diagnóstico"),
+              tags$p(class = "titulo", "Instrucciones"),
               tags$p(class = "subtitulo",
-                     "Desde la programación de la cita hasta la entrega de resultados al paciente. ",
-                     "Carga el Excel con las actividades para generar el análisis PERT-CPM completo.")
+                     "Carga tu archivo Excel con las actividades del proyecto y 
+                     obtén automáticamente los cálculos, la red, el Gantt y el 
+                     análisis de probabilidades.")
             ),
             
             div(
@@ -82,43 +72,44 @@ ui <- page_navbar(
         col_widths = breakpoints(
           sm = c(12),
           md = c(6, 6),
-          lg = c(c(2,2,2,3,3))
+          lg = c(c(2,2,2,2,4))
         ),
         value_box(
-          title = "Duración optimista (Σa ruta crítica)",
+          title = "Duración optimista",
           value = textOutput("vb_opt"),
-          showcase = bs_icon("rocket-takeoff-fill"),
-          theme = value_box_theme(bg = "#00BFA5", fg = "white"),
+          #showcase = bs_icon("rocket-takeoff-fill"),
+          theme = value_box_theme(bg = "#1F6FBF", fg = "white"),
           p(class = "vbox-sub", "Mejor escenario posible")
         ),
         value_box(
-          title = "Duración esperada (TPy)",
+          title = "Duración esperada",
           value = textOutput("vb_tpy"),
-          showcase = bs_icon("calendar-check-fill"),
+          #showcase = bs_icon("calendar-check-fill"),
           theme = value_box_theme(bg = "#1E3A5F", fg = "white"),
           p(class = "vbox-sub", "Estimación PERT del proyecto")
         ),
         value_box(
-          title = "Duración pesimista (Σb ruta crítica)",
+          title = "Duración pesimista",
           value = textOutput("vb_pes"),
-          showcase = bs_icon("exclamation-triangle-fill"),
-          theme = value_box_theme(bg = "#E74C3C", fg = "white"),
+          #showcase = bs_icon("exclamation-triangle-fill"),
+          theme = value_box_theme(bg = "#002261", fg = "white"),
           p(class = "vbox-sub", "Peor escenario posible")
-        ),
-        value_box(
-          title = "Ruta crítica",
-          value = textOutput("vb_ruta"),
-          showcase = bs_icon("signpost-split-fill"),
-          theme = value_box_theme(bg = "#1F6FBF", fg = "white"),
-          p(class = "vbox-sub", textOutput("vb_ruta_n", inline = TRUE))
         ),
         value_box(
           title = "Σ Varianza (ruta crítica)",
           value = textOutput("vb_var"),
-          showcase = bs_icon("graph-up"),
-          theme = value_box_theme(bg = "#002261", fg = "white"),
+          #showcase = bs_icon("graph-up"),
+          theme = value_box_theme(bg = "#90A4B8", fg = "white"),
           p(class = "vbox-sub", textOutput("vb_sigma", inline = TRUE))
+        ),
+        value_box(
+          title = "Ruta crítica",
+          value = textOutput("vb_ruta"),
+          #showcase = bs_icon("signpost-split-fill"),
+          theme = value_box_theme(bg = "#0D47A1", fg = "white"),
+          p(class = "vbox-sub", textOutput("vb_ruta_n", inline = TRUE))
         )
+
       ),
       
       # ---- Sub-pestañas ----
@@ -126,15 +117,21 @@ ui <- page_navbar(
         
         # 1. Cálculos ----------------------------------------------------
         nav_panel(
-          title = "Cálculos (t̄, σ²)",
+          title = "Tiempos y varianza",
           card(
             card_header(tags$div(
               tags$p(class = "titulo", "Duración esperada y varianza por actividad"),
               tags$p(class = "subtitulo",
-                     "Calculado con la distribución beta: t̄ = (a + 4m + b) / 6   y   σ² = ((b − a) / 6)²")
+                     "Esta tabla muestra la duración esperada (t̄) y la varianza (σ²) de cada actividad,
+                      calculadas a partir de los tres tiempos estimados: optimista (a), más probable (m) 
+                      y pesimista (b).")
             )),
             card_body(
-              reactableOutput("tbl_calc", height = "400px")
+              reactableOutput("tbl_calc", height = "400px"),
+              tags$p(
+                class = "subtitulo",
+                "Calculado con la distribución beta: t̄ = (a + 4m + b) / 6  y  σ² = ((b − a) / 6)²"
+              )
             ) 
           )
         ),
@@ -146,7 +143,9 @@ ui <- page_navbar(
             card_header(tags$div(
               tags$p(class = "titulo", "Tiempos tempranos/tardíos y ruta crítica"),
               tags$p(class = "subtitulo",
-                     "ES/EF = recorrido hacia adelante. LS/LF = recorrido hacia atrás. Holgura = LS − ES. Filas en rojo = actividades críticas.")
+                     "Esta tabla presenta los resultados del algoritmo CPM: tiempos de inicio y fin tempranos (ES, EF), 
+                      tardíos (LS, LF), holgura de cada actividad y si pertenece a la ruta crítica. 
+                      Las filas resaltadas indican actividades con holgura cero, es decir, sin margen de retraso.")
             )),
             card_body(
               reactableOutput("tbl_cpm", height = "400px")
@@ -161,10 +160,10 @@ ui <- page_navbar(
             card_header(tags$div(
               tags$p(class = "titulo", "Diagrama de Gantt"),
               tags$p(class = "subtitulo",
-                     "Barras según tiempos tempranos (ES → EF). Rojo = actividad crítica, azul = no crítica.")
+                     "Representación gráfica de las actividades en el tiempo según sus tiempos tempranos.")
             )),
             card_body(
-              echarts4rOutput("gantt", height = "560px"),
+              echarts4rOutput("gantt", height = "400px"),
               tags$div(
                 style = "display:flex; gap:18px; margin-top:10px; flex-wrap:wrap;",
                 tags$div(class = "legend-item",
@@ -180,15 +179,21 @@ ui <- page_navbar(
         
         # 4. Red ------------------------------------------------------------
         nav_panel(
-          title = "Red del Proyecto",
+          title = "Red del proceso",
           card(
             card_header(tags$div(
-              tags$p(class = "titulo", "Red del proyecto (PERT-CPM)"),
+              tags$p(class = "titulo", "Red del proceso (PERT-CPM)"),
               tags$p(class = "subtitulo",
-                     "Nodos en rojo = ruta crítica. Pasa el mouse sobre un nodo para ver ES, EF, LS, LF y holgura.")
+                     "Diagrama de nodos que representa la secuencia y dependencias entre actividades. 
+                      Los nodos en rojo forman la ruta crítica.")
             )),
             card_body(
-              echarts4rOutput("red", height = "600px")
+              echarts4rOutput("red", height = "400px"),
+              tags$p(
+                class = "subtitulo",
+                "Pasa el cursor sobre cada nodo para ver ES, EF, LS, LF y holgura. 
+                Puedes arrastrar los nodos para reorganizar la vista."
+              )
             )
           )
         ),
@@ -200,19 +205,21 @@ ui <- page_navbar(
             card_header(tags$div(
               tags$p(class = "titulo", "Análisis de probabilidades"),
               tags$p(class = "subtitulo",
-                     "Estandarización con z = (TS − TPy) / √(Σσ²RC). Ajusta los valores de TS para recalcular en tiempo real.")
+                     "Análisis probabilístico basado en la varianza acumulada de la ruta crítica. 
+                      Ajusta los valores de TS para recalcular en tiempo real la probabilidad de finalizar 
+                      el proyecto en un plazo determinado.")
             )),
             card_body(
               layout_columns(
                 col_widths = breakpoints(sm = c(12), md = c(6,6), lg = c(3,3,3,3)),
                 div(
-                  numericInput("ts_opt", "TS para P1 (tiempo optimista)", value = NA, width = "100%"),
+                  numericInput("ts_opt", "Probabilidad de terminar antes de TS", value = NA, width = "100%"),
                 ),
                 div(
-                  numericInput("ts_pes", "TS para P2 (tiempo pesimista)", value = NA, width = "100%"),
+                  numericInput("ts_pes", "Probabilidad de terminar después de TS", value = NA, width = "100%"),
                 ),
                 div(
-                  sliderInput("prob3", "Probabilidad para P3", min = 0.5, max = 0.99, value = 0.90, step = 0.01, width = "100%")
+                  sliderInput("prob3", "Nivel de confianza deseado", min = 0.5, max = 0.99, value = 0.90, step = 0.01, width = "100%")
                 ),
                 div(
                   numericInput("ts_libre", "Consulta libre — P(T ≤ TS)", value = NA, width = "100%")
